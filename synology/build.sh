@@ -28,7 +28,7 @@ sed -i "s/\"version\": \"1\"/\"version\": \"$SPK_VERSION\"/" "$target/ui/config"
 # Icons: PACKAGE_ICON.PNG (64), PACKAGE_ICON_256.PNG (256), ui/images/<n>.png.
 # DSM shows them as supplied — draw a rounded tile with transparent corners.
 python3 synology/icon.py "$spk" --ui "$target/ui/images" --sizes 16,24,32,48,64,72,128,256 \
-  --letter F --top '#2f8be6' --bottom '#1659a8'
+  --mark synology/icon-mark.png --top '#0078d7' --bottom '#104a7d'   # FreeScout's own mark, in its brand blue to its wordmark navy
 
 find "$target" -type d -exec chmod 755 {} +
 find "$target" -type f -exec chmod 644 {} +

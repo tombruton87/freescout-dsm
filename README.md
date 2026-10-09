@@ -10,8 +10,12 @@ activity log, and a clean removal.
 
 ## Download
 
-**[⬇ freescout-1.0.0-1.spk](https://github.com/tombruton87/freescout-dsm/releases/download/v1.0.0/freescout-1.0.0-1.spk)** — version 1.0.0 (120 KB).
-All versions: [Releases](https://github.com/tombruton87/freescout-dsm/releases/latest).
+### **[⬇ Download freescout.spk](https://github.com/tombruton87/freescout-dsm/releases/latest/download/freescout.spk)**
+
+[![Latest release](https://img.shields.io/github/v/release/tombruton87/freescout-dsm?label=latest&color=0078d7)](https://github.com/tombruton87/freescout-dsm/releases/latest)
+
+That link always gives the newest version. Older ones are on the
+[Releases](https://github.com/tombruton87/freescout-dsm/releases) page.
 
 **Install:** Package Center → Manual Install → the `.spk`. DSM 7.2.1 or later; Container Manager is
 installed first if missing. The wizard asks for the NAS's address, a port, a
@@ -149,3 +153,18 @@ the `.spk` attached to a GitHub release of `tombruton87/freescout-dsm` (the
 Update tab reads `releases/latest` and only installs an asset whose `INFO`
 says `package="freescout"` with a newer version). Change `REPO` at the top of
 `synology/setup/run.sh` if the repository moves.
+
+Steps: bump `VERSION`, add the changes to `CHANGELOG.md`, `synology/build.sh 1`,
+then attach the package twice, under its versioned name and as `freescout.spk`
+(the README's download link points at that name on the latest release):
+
+```bash
+cp dist/freescout-X.Y.Z-1.spk /tmp/freescout.spk
+gh release create vX.Y.Z dist/freescout-X.Y.Z-1.spk /tmp/freescout.spk
+```
+
+## Credits
+
+The icon is FreeScout's own mark (from the FreeScout image) on a DSM-style
+tile in FreeScout's colours. This package is not affiliated with FreeScout or
+Synology.

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- A new icon: FreeScout's own mark on a tile shaped like DSM's own icons, in
+  FreeScout's blue fading to its navy, in Package Center, the main menu and
+  the window.
+
 ## 1.0.0
 
 First release. Everything below was developed as builds 1–17 of 0.1.0 and verified on a Synology NAS (DSM 7.2, Container Manager) and locally end to end.
