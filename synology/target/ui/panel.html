@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FreeScout</title>
+<!--
+  FreeScout's window in DSM: shown by freescout.js inside a DSM window, served
+  by DSM itself, and talking to api.cgi beside it. Laid out as Synology's own
+  apps are. What it does is in panel.js.
+-->
+<style>
+  :root {
+    --text: #333f4d; --muted: #6b7a89; --faint: #98a4b0; --line: #e2e7ec; --soft: #f6f8fa; --side: #f2f5f8;
+    --blue: #057feb; --blue-dark: #006ad1; --blue-soft: #e6f1fd;
+    --green: #26a65b; --green-soft: #e5f6ec; --amber: #e58e00; --amber-soft: #fff4de; --red: #e5383b; --red-soft: #fdeaea;
+    --font: "Noto Sans", "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font: 13px/1.5 var(--font); color: var(--text); background: #fff; display: flex; overflow: hidden; }
+  a { color: var(--blue); text-decoration: none; } a:hover { text-decoration: underline; }
+  [hidden] { display: none !important; }
+
+  aside { width: 190px; background: var(--side); border-right: 1px solid var(--line); display: flex; flex-direction: column; flex: none; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 16px 16px 14px; }
+  .brand img { width: 32px; height: 32px; border-radius: 6px; }
+  .brand b { display: block; font-size: 14px; font-weight: 600; line-height: 1.2; }
+  .brand span { color: var(--muted); font-size: 11.5px; }
+  aside nav { padding: 4px 8px; display: flex; flex-direction: column; gap: 2px; }
+  aside nav button { display: flex; align-items: center; gap: 8px; width: 100%; font: inherit; color: var(--text); background: none; border: 0; border-radius: 4px; padding: 7px 10px; cursor: pointer; text-align: left; }
+  aside nav button:hover { background: #e8edf2; }
+  aside nav button[aria-selected="true"] { background: var(--blue-soft); color: var(--blue); font-weight: 600; }
+  aside nav .badge { margin-left: auto; background: var(--red); color: #fff; font-size: 11px; font-weight: 600; border-radius: 9px; padding: 0 6px; line-height: 18px; min-width: 18px; text-align: center; }
+  aside nav .badge.warn { background: var(--amber); }
+  aside .foot { margin-top: auto; padding: 12px 16px; color: var(--muted); font-size: 11.5px; border-top: 1px solid var(--line); }
+
+  main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-bottom: 1px solid var(--line); min-height: 53px; flex-wrap: wrap; }
+  .bar h1 { font-size: 15px; font-weight: 600; margin: 0 auto 0 0; }
+  .page { flex: 1; overflow: auto; padding: 18px 20px 24px; }
+
+  .btn { font: inherit; height: 28px; padding: 0 14px; border-radius: 3px; border: 1px solid #c8d1db; background: #fff; color: var(--text); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); text-decoration: none; }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .btn.primary:hover:not(:disabled) { background: var(--blue-dark); color: #fff; }
+  .btn.danger { color: var(--red); border-color: #f0b5b6; }
+  .btn.danger:hover:not(:disabled) { background: var(--red); border-color: var(--red); color: #fff; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; white-space: nowrap; }
+  .chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+  .chip.ok i { background: var(--green); } .chip.warn i { background: var(--amber); } .chip.bad i { background: var(--red); }
+  .chip.ok { color: #1c7a44; } .chip.warn { color: #9a5e00; } .chip.bad { color: #b42326; }
+
+  .note { margin: 0 0 14px; padding: 9px 12px; border-radius: 4px; background: var(--soft); border: 1px solid var(--line); }
+  .note.good { background: var(--green-soft); border-color: #bfe6cf; } .note.warn { background: var(--amber-soft); border-color: #f4d9a6; } .note.bad { background: var(--red-soft); border-color: #f4c4c5; }
+  .note b { font-weight: 600; }
+
+  .card { border: 1px solid var(--line); border-radius: 6px; margin-bottom: 16px; background: #fff; }
+  .card > h2 { font-size: 13px; font-weight: 600; margin: 0; padding: 11px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 8px; }
+  .card > h2 .right { margin-left: auto; font-weight: normal; }
+  .card > .in { padding: 14px 16px; }
+  .card > .in p:first-child { margin-top: 0; } .card > .in p:last-child { margin-bottom: 0; }
+  .muted { color: var(--muted); } .small { font-size: 12px; }
+
+  .hero { display: flex; align-items: center; gap: 18px; padding: 18px 20px; }
+  .hero .dot { width: 56px; height: 56px; border-radius: 50%; flex: none; background: var(--faint); }
+  .hero .dot.ok { background: var(--green); } .hero .dot.warn { background: var(--amber); } .hero .dot.bad { background: var(--red); }
+  .hero b { display: block; font-size: 18px; font-weight: 600; }
+  .hero .actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .tile { border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
+  .tile b { display: block; font-size: 19px; font-weight: 600; line-height: 1.15; }
+  .tile span { color: var(--muted); font-size: 12px; }
+
+  table { border-collapse: collapse; width: 100%; }
+  th { text-align: left; font-weight: normal; color: var(--muted); font-size: 12px; background: var(--soft); padding: 7px 16px; border-bottom: 1px solid var(--line); }
+  td { padding: 9px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  td.k { color: var(--muted); width: 36%; }
+  td.n, th.n { text-align: right; white-space: nowrap; }
+  code { font: 12px/1.4 var(--mono); background: var(--soft); border: 1px solid var(--line); padding: 1px 5px; border-radius: 3px; }
+  pre { font: 12px/1.45 var(--mono); background: #1f2730; color: #dde4ec; padding: 12px 14px; border-radius: 6px; overflow: auto; max-height: 60vh; white-space: pre-wrap; word-break: break-all; margin: 0; }
+
+  label.f { display: block; margin-bottom: 12px; }
+  label.f span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 3px; }
+  input[type=text], input[type=number], select { font: inherit; height: 30px; padding: 0 8px; border: 1px solid #c8d1db; border-radius: 3px; width: 100%; max-width: 420px; background: #fff; color: var(--text); }
+  input[type=checkbox] { vertical-align: -2px; margin-right: 6px; }
+  .secret { font: 600 20px/1.3 var(--mono); letter-spacing: 1px; background: var(--amber-soft); border: 1px dashed #e0b45c; padding: 10px 14px; border-radius: 6px; display: inline-block; user-select: all; }
+  .empty { text-align: center; color: var(--muted); padding: 30px 16px; }
+  .meter { height: 6px; border-radius: 3px; background: #e9eef3; overflow: hidden; min-width: 100px; }
+  .meter i { display: block; height: 100%; background: var(--blue); border-radius: 3px; }
+  .meter i.warn { background: var(--amber); } .meter i.bad { background: var(--red); }
+  .tabs { display: flex; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
+  .tabs button { font: inherit; background: none; border: 1px solid transparent; border-radius: 3px; padding: 4px 10px; cursor: pointer; color: var(--muted); }
+  .tabs button[aria-selected="true"] { border-color: var(--line); background: var(--soft); color: var(--text); font-weight: 600; }
+  .mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .mod { border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; background: #fff; }
+  .mod .logo { width: 48px; height: 48px; border-radius: 10px; flex: none; background: var(--blue-soft); color: var(--blue); display: grid; place-items: center; font-weight: 600; font-size: 20px; overflow: hidden; }
+  .mod .logo img { width: 100%; height: 100%; object-fit: contain; }
+  .mod .body { flex: 1; min-width: 0; }
+  .mod .body b { display: block; font-size: 14px; }
+  .mod .ver { color: var(--muted); font-size: 12px; margin: 1px 0 6px; }
+  .mod .ver .up { color: #9a5e00; font-weight: 600; }
+  .mod p { margin: 0 0 8px; }
+  .mod .row { margin-top: 8px; }
+  .mod.bad { border-color: #f4c4c5; }
+  /* Long names, URLs and requirement lines wrap inside a card instead of running past its edge. */
+  .mod .body { overflow-wrap: anywhere; word-break: break-word; }
+  .mod .body b { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .mod .chip { white-space: normal; align-items: flex-start; }
+  .mod .chip i { margin-top: 6px; }
+  .mod .btn { white-space: normal; height: auto; min-height: 28px; padding: 4px 12px; text-align: left; }
+  .mods-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .mods-bar input[type=search] { flex: 1; min-width: 180px; max-width: 360px; }
+  .mods-bar .tabs { margin: 0; }
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand"><img src="images/48.png" alt=""><div><b>FreeScout</b><span id="brand-version">help desk</span></div></div>
+  <nav id="nav">
+    <button data-tab="overview" aria-selected="true">Overview</button>
+    <button data-tab="access">Access<span class="badge" id="badge-access" hidden></span></button>
+    <button data-tab="users">Users</button>
+    <button data-tab="backups">Backups<span class="badge warn" id="badge-backups" hidden></span></button>
+    <button data-tab="site">Site address</button>
+    <button data-tab="mail">Mail &amp; queue<span class="badge" id="badge-mail" hidden></span></button>
+    <button data-tab="modules">Modules<span class="badge warn" id="badge-modules" hidden></span></button>
+    <button data-tab="updates">Updates<span class="badge warn" id="badge-updates" hidden></span></button>
+    <button data-tab="storage">Storage</button>
+    <button data-tab="activity">Activity<span class="badge" id="badge-activity" hidden></span></button>
+    <button data-tab="maintenance">Maintenance</button>
+  </nav>
+  <div class="foot" id="foot">package —</div>
+</aside>
+<main>
+  <div class="bar">
+    <h1 id="title">Overview</h1>
+    <span class="chip" id="chip"><i></i><span>…</span></span>
+    <span class="muted small" id="busy" hidden></span>
+  </div>
+  <div class="page">
+    <div class="note warn" id="readonly" hidden>You can look, but not change anything: only DSM administrators can act here.</div>
+    <div class="note" id="last" hidden><span id="last-text"></span> <a href="#" id="last-log" hidden>Open the setup log</a><pre id="last-detail" hidden style="margin-top:8px;max-height:220px"></pre></div>
+    <div class="note bad" id="err" hidden></div>
+
+    <!-- ============================================================ overview -->
+    <section data-page="overview">
+      <div class="card"><div class="hero">
+        <div class="dot" id="hero-dot"></div>
+        <div><b id="hero-title">Starting…</b><span class="muted" id="hero-sub"></span></div>
+        <div class="actions">
+          <a class="btn primary" id="open-link" target="_blank" rel="noopener">Open FreeScout</a>
+          <button class="btn" data-act="restart" data-confirm="Restart FreeScout? It's away for about a minute.">Restart</button>
+        </div>
+      </div></div>
+      <div class="tiles" id="tiles"></div>
+      <div class="card"><h2>Containers</h2><table><tbody id="containers"></tbody></table></div>
+      <div class="card"><h2>Setup log<span class="right"><button class="btn" id="reload-setup-log">Refresh</button></span></h2><div class="in"><pre id="setup-log">…</pre></div></div>
+    </section>
+
+    <!-- ============================================================== access -->
+    <section data-page="access" hidden>
+      <div class="note">Locked out of FreeScout — lost password, account disabled, or the only administrator left? Everything here works without signing in to FreeScout, because DSM has already signed you in. A new password is made by the package, shown <b>once</b>, and kept nowhere.</div>
+      <div class="card"><h2>Administrators</h2><table><thead><tr><th>Name</th><th>Email</th><th>Status</th><th class="n"></th></tr></thead><tbody id="admins"></tbody></table></div>
+      <div class="card" id="secret-card" hidden><h2>New password</h2><div class="in">
+        <p>For <b id="secret-for"></b>. Copy it now — it isn't shown again, and the account is active:</p>
+        <p><span class="secret" id="secret"></span> <button class="btn" id="copy-secret">Copy</button></p>
+        <p class="muted small">Sign in to FreeScout with it, then change it under your profile.</p>
+      </div></div>
+      <div class="card"><h2>Add an administrator</h2><div class="in">
+        <p class="muted small">When the administrator's email is lost too, or you'd rather not touch their account: a new one, with a password shown once.</p>
+        <label class="f"><span>Email</span><input type="text" id="new-email" placeholder="you@example.com"></label>
+        <div class="row"><label class="f"><span>First name</span><input type="text" id="new-first" value="Admin"></label><label class="f"><span>Last name</span><input type="text" id="new-last" value="User"></label></div>
+        <button class="btn primary" id="newadmin">Create administrator</button>
+      </div></div>
+      <div class="card"><h2>Sessions</h2><div class="in">
+        <p class="muted small">Signs everyone out of FreeScout, everywhere — after a password reset, or if a device that was signed in has gone missing.</p>
+        <button class="btn" data-act="logout" data-confirm="Sign everyone out of FreeScout?">Sign everyone out</button>
+      </div></div>
+    </section>
+
+    <!-- =============================================================== users -->
+    <section data-page="users" hidden>
+      <div class="note">Every agent in FreeScout, with their last sign-in. From here you can reset a password (shown once, under Access), disable or re-enable an account, make someone an administrator or an agent, and remove someone who has left — without signing in to FreeScout. The last active administrator is protected.</div>
+      <div class="mods-bar"><input type="search" id="users-q" placeholder="Search users…" autocomplete="off"><span class="muted small" id="users-count"></span></div>
+      <div class="card"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last sign-in</th><th class="n"></th></tr></thead><tbody id="users"></tbody></table></div>
+    </section>
+
+    <!-- ============================================================= backups -->
+    <section data-page="backups" hidden>
+      <div class="note">A backup is one file in the <b>freescout</b> shared folder, <code>backups/</code>: the database, the configuration (including the key that encrypts mailbox passwords), attachments and modules. Keep a copy somewhere else too — Hyper Backup can include the shared folder.</div>
+      <div class="card"><h2>Backups<span class="right"><button class="btn primary" data-act="backup">Back up now</button></span></h2><table><thead><tr><th>Name</th><th class="n">Size</th><th>Made</th><th class="n"></th></tr></thead><tbody id="backups"></tbody></table></div>
+      <div class="card"><h2>Every night</h2><div class="in">
+        <p><label><input type="checkbox" id="pref-nightly"> Back up every night at 2:00</label></p>
+        <label class="f"><span>Keep nightly backups for</span><input type="number" id="pref-keep" min="1" max="365" style="max-width:100px"> days</label>
+        <button class="btn" id="save-prefs">Save</button>
+      </div></div>
+    </section>
+
+    <!-- ================================================================ site -->
+    <section data-page="site" hidden>
+      <div class="note">FreeScout must know the address people type, or links in emails and redirects after sign-in go to the wrong place. Change it here when you move to a domain, or put FreeScout behind DSM's reverse proxy for HTTPS.</div>
+      <div class="card"><h2>Address</h2><div class="in">
+        <label class="f"><span>Address people use</span><input type="text" id="set-url" placeholder="http://192.168.1.10:8060 or https://help.example.com"></label>
+        <label class="f"><span>Web port on this Synology</span><input type="number" id="set-port" min="1024" max="65535" style="max-width:140px"></label>
+        <label class="f"><span>Time zone</span><input type="text" id="set-tz" placeholder="Europe/London" style="max-width:240px"></label>
+        <p><label><input type="checkbox" id="set-ssl"> Behind DSM's reverse proxy with HTTPS (trust the proxy, secure cookies)</label></p>
+        <button class="btn primary" id="save-settings">Save and restart FreeScout</button>
+      </div></div>
+      <div class="card"><h2>HTTPS with DSM's reverse proxy</h2><div class="in">
+        <p>Third-party packages can't use DSM's certificates directly, but DSM's reverse proxy can front FreeScout with them:</p>
+        <ol>
+          <li><b>Control Panel → Login Portal → Advanced → Reverse Proxy → Create</b>: source <code>HTTPS</code>, hostname your domain (for instance <code>help.example.com</code>), port <code>443</code>; destination <code>HTTP</code>, <code>localhost</code>, port <span id="site-port">8060</span>.</li>
+          <li>Under <b>Custom Header</b>, <b>Create → WebSocket</b> (adds the Upgrade headers), and make sure <code>X-Forwarded-For</code> / <code>X-Forwarded-Proto</code> are passed.</li>
+          <li><b>Control Panel → Security → Certificate → Settings</b>: give that reverse-proxy entry your certificate.</li>
+          <li>Here: set the address to <code>https://your.domain</code>, tick <i>Behind DSM's reverse proxy</i>, save.</li>
+        </ol>
+      </div></div>
+    </section>
+
+    <!-- ================================================================ mail -->
+    <section data-page="mail" hidden>
+      <div class="note">FreeScout fetches mail and sends replies on a schedule (every minute) and through a queue worker. When replies stop going out or new mail stops arriving, this is where to look.</div>
+      <div class="tiles" id="mail-tiles"></div>
+      <div class="card"><h2>Actions</h2><div class="in row">
+        <button class="btn primary" data-act="fetch">Fetch mail now</button>
+        <button class="btn" data-act="retryjobs" data-confirm="Put all failed jobs back in the queue?">Retry failed jobs</button>
+        <button class="btn danger" data-act="flushjobs" data-confirm="Clear all failed jobs? They won't be retried.">Clear failed jobs</button>
+      </div></div>
+      <div class="card"><h2>Logs</h2><div class="in">
+        <div class="tabs" id="mail-log-tabs">
+          <button data-log="fetch" aria-selected="true">Fetch mail (last run)</button><button data-log="scheduler">Scheduler</button><button data-log="worker">Queue worker</button><button data-log="laravel">FreeScout's log</button>
+        </div>
+        <pre id="mail-log">…</pre>
+      </div></div>
+    </section>
+
+    <!-- ============================================================= modules -->
+    <section data-page="modules" hidden>
+      <div class="note">A small store for FreeScout modules kept on GitHub. Installing downloads the latest release into FreeScout and activates it, as the Modules page in FreeScout would. To add a module of your own, put a <code>modules.json</code> in the <b>freescout</b> shared folder listing its repository (see the package's <code>modules/catalog.json</code> for the shape), then look again.</div>
+      <div class="mods-bar">
+        <input type="search" id="mods-q" placeholder="Search modules — name, what it does, author, needs…" autocomplete="off">
+        <div class="tabs" id="mods-filter"><button data-f="all" aria-selected="true">All</button><button data-f="installed">Installed</button><button data-f="updates">Updates</button><button data-f="ready">Ready to install</button></div>
+        <span class="muted small" id="mods-count"></span>
+      </div>
+      <div class="row" style="margin-bottom:14px"><button class="btn" data-act="modcheck">Look for module updates</button><span class="muted small" id="mods-checked"></span></div>
+      <div class="mods" id="mods"></div>
+    </section>
+
+    <!-- ============================================================= updates -->
+    <section data-page="updates" hidden>
+      <div class="card"><h2>FreeScout</h2><div class="in" id="upd-app"></div></div>
+      <div class="card"><h2>This package</h2><div class="in" id="upd-pkg"></div></div>
+      <div class="card"><h2>Changelog</h2><div class="in"><pre id="changelog">…</pre></div></div>
+    </section>
+
+    <!-- ============================================================= storage -->
+    <section data-page="storage" hidden>
+      <div class="note">Where the space goes, and what can be trimmed. FreeScout trims its send log, notifications and temporary files on its own schedule; the buttons run those now. Emptying log files is safe — they're diagnostics, not data.</div>
+      <div class="tiles" id="storage-tiles"></div>
+      <div class="card"><h2>Attachments by mailbox</h2><table><thead><tr><th>Mailbox</th><th class="n">Files</th><th class="n">Size</th></tr></thead><tbody id="storage-mailboxes"></tbody></table></div>
+      <div class="card"><h2>Biggest database tables</h2><table><thead><tr><th>Table</th><th class="n">Rows</th><th class="n">Size</th></tr></thead><tbody id="storage-tables"></tbody></table></div>
+      <div class="card"><h2>Folders</h2><table><tbody id="storage-dirs"></tbody></table></div>
+      <div class="card"><h2>Trim</h2><div class="in row">
+        <button class="btn" data-act="cleansendlog">Clean send log</button>
+        <button class="btn" data-act="cleannotifications">Clean notifications</button>
+        <button class="btn" data-act="cleantmp">Clean temporary files</button>
+        <button class="btn" data-act="clearlogs" data-confirm="Empty FreeScout's, nginx's and PHP's log files? They're diagnostics only.">Empty log files</button>
+        <button class="btn" data-act="clearcache">Clear caches</button>
+      </div></div>
+    </section>
+
+    <!-- ============================================================ activity -->
+    <section data-page="activity" hidden>
+      <div class="note">Sign-ins, sign-outs, failed attempts and lockouts, from FreeScout's own activity log. Twenty or more failed sign-ins in an hour raise a DSM notification. "Sign everyone out" ends every FreeScout session at once.</div>
+      <div class="tiles" id="activity-tiles"></div>
+      <div class="card" id="activity-byip-card" hidden><h2>Failed sign-ins in the last 24 hours, by address</h2><table><thead><tr><th>Address</th><th class="n">Attempts</th></tr></thead><tbody id="activity-byip"></tbody></table></div>
+      <div class="card"><h2>Recent events<span class="right row"><input type="search" id="activity-q" placeholder="Filter…" autocomplete="off" style="height:26px;max-width:220px"><button class="btn" data-act="logout" data-confirm="Sign everyone out of FreeScout?">Sign everyone out</button></span></h2>
+        <table><thead><tr><th>When</th><th>Event</th><th>Who</th><th>Address</th></tr></thead><tbody id="activity-rows"></tbody></table></div>
+    </section>
+
+    <!-- ========================================================= maintenance -->
+    <section data-page="maintenance" hidden>
+      <div class="card"><h2>Maintenance mode</h2><div class="in">
+        <p class="muted small" id="maint-state"></p>
+        <div class="row"><button class="btn" id="maint-on">Turn on</button><button class="btn" id="maint-off">Turn off</button></div>
+      </div></div>
+      <div class="card"><h2>Caches</h2><div class="in">
+        <p class="muted small">After changing settings or installing a module by hand, FreeScout may show stale pages; this clears its caches. Harmless.</p>
+        <button class="btn" data-act="clearcache">Clear caches</button>
+      </div></div>
+      <div class="card"><h2>Support report</h2><div class="in">
+        <p class="muted small">Everything a helper needs — versions, settings without secrets, the last logs — with addresses and emails replaced by stand-ins, so it can be pasted into a public issue.</p>
+        <div class="row"><button class="btn" data-act="report">Make a report</button><a class="btn" id="report-link" href="api.cgi?action=report" hidden>Save the report</a></div>
+      </div></div>
+      <div class="card" style="border-color:#f4c4c5"><h2 style="color:#b42326">Remove FreeScout and everything</h2><div class="in">
+        <p>Removes it all: FreeScout's containers and images, its database, attachments, modules and logs (the Docker volumes), the <b>freescout</b> shared folder with its backups and settings, and then the package itself — DSM's own uninstaller and shared-folder tools finish the job, so nothing is left to do by hand. There is no undo.</p>
+        <p><label><input type="checkbox" id="wipe-saved"> I have copied any backup I want to keep out of the freescout shared folder.</label></p>
+        <label class="f"><span>Type <code>remove everything</code> to confirm</span><input type="text" id="wipe-phrase" autocomplete="off" placeholder="remove everything" style="max-width:260px"></label>
+        <button class="btn danger" id="wipe">Remove FreeScout and everything</button>
+      </div></div>
+      <div class="card"><h2>Container logs</h2><div class="in">
+        <div class="tabs" id="maint-log-tabs"><button data-log="app" aria-selected="true">freescout-app</button><button data-log="db">freescout-db</button><button data-log="setup">Setup</button></div>
+        <pre id="maint-log">…</pre>
+      </div></div>
+    </section>
+  </div>
+</main>
+<script src="panel.js"></script>
+</body>
+</html>

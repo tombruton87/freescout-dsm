@@ -1,0 +1,38 @@
+# The package's one Container Manager project (conf/resource): a container that
+# sets FreeScout up and looks after it — run.sh, beside this. FreeScout itself
+# runs as a compose project of its own, from the shared folder (app/compose.yaml).
+#
+# DSM's third-party packages can't run as root, and Docker needs it: this is
+# how the package reaches Docker. Container Manager runs this project for it,
+# and this container has Docker's socket.
+services:
+  setup:
+    build: .
+    image: freescout-setup:local
+    container_name: freescout-setup
+    # Container Manager runs a package's containers as the package's own user
+    # unless told otherwise, and Docker's socket is root's.
+    user: "0:0"
+    # On the Synology's own network, so setup sees its addresses and ports.
+    network_mode: host
+    # A setup that fails should stay stopped, visibly, until someone acts.
+    restart: "no"
+    # Taking FreeScout down, when the package stops, takes a while.
+    stop_grace_period: 2m
+    entrypoint: ["bash", "/pkg/setup/run.sh"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/packages/freescout/target:/pkg:ro
+      - /var/packages/freescout/var:/pkgvar
+      # The data share at the SAME path inside as outside, so the paths this
+      # container hands Docker are ones the Synology has. Never made here.
+      - type: bind
+        source: /var/packages/freescout/shares/freescout
+        target: /var/packages/freescout/shares/freescout
+        bind:
+          create_host_path: false
+      # Where DSM keeps the firewall's list of applications (services.d or service.d).
+      - /usr/local/etc:/dsm-etc
+      # "This is a Synology", and its time zone.
+      - /etc.defaults/VERSION:/etc.defaults/VERSION:ro
+      - /etc/synoinfo.conf:/etc/synoinfo.conf:ro

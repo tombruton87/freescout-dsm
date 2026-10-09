@@ -1,0 +1,19 @@
+{
+    "data-share": {
+        "shares": [
+            { "name": "freescout", "permission": { "rw": ["freescout"] } }
+        ]
+    },
+    "port-config": {
+        "protocol-file": "freescout.sc"
+    },
+    "docker-project": {
+        "projects": [
+            {
+                "name": "freescout-setup",
+                "path": "setup",
+                "build_params": { "force_pull": false, "force_recreate": true, "build": true }
+            }
+        ]
+    }
+}

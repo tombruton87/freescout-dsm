@@ -1,0 +1,6 @@
+[{
+    "step_title": "Removing FreeScout",
+    "items": [{
+        "desc": "FreeScout stops and its containers are removed. Your help desk stays: the database, configuration and attachments in Container Manager's volumes, backups and settings in the <b>freescout</b> shared folder. Install the package again and it picks up where it left off.<br><br>To remove everything for good, cancel this and use <b>FreeScout → Maintenance → Remove FreeScout and everything</b> instead: it removes the containers, images, volumes, the shared folder and then this package. If the package can no longer start, remove by hand: this uninstall, then the <b>freescout</b> shared folder (Control Panel → Shared Folder), the volumes <b>freescout_app-data</b>, <b>freescout_app-logs</b> and <b>freescout_db-data</b> (Container Manager → Volume) and the FreeScout and MariaDB images (Container Manager → Image)."
+    }]
+}]

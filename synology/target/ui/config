@@ -1,0 +1,31 @@
+{
+    "freescout.js": {
+        "FreeScout.AppInstance": {
+            "type": "app",
+            "title": "FreeScout",
+            "desc": "Help desk and shared mailbox",
+            "version": "1",
+            "icon": "images/{0}.png",
+            "texts": "texts",
+            "preloadTexts": [
+                "notification:title",
+                "notification:failing",
+                "notification:restarted",
+                "notification:backupfailed",
+                "notification:bruteforce"
+            ],
+            "allowMultiInstance": false,
+            "allUsers": false,
+            "grantPrivilege": "local",
+            "advanceGrantPrivilege": true,
+            "appWindow": "FreeScout.AppWindow",
+            "depend": ["FreeScout.AppWindow"]
+        },
+        "FreeScout.AppWindow": {
+            "type": "lib",
+            "title": "FreeScout",
+            "icon": "images/{0}.png",
+            "texts": "texts"
+        }
+    }
+}

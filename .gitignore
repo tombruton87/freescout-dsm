@@ -1,0 +1,7 @@
+# Built packages (attached to GitHub releases instead)
+dist/
+# Local test leftovers
+*.log
+__pycache__/
+.DS_Store
+synology/target/ui/images/

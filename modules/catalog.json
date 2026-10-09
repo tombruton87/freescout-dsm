@@ -1,0 +1,399 @@
+{
+  "_comment": "FreeScout modules the package's Modules tab can install. Each entry is a public GitHub repository holding a module (module.json at the root, or under `path`), ideally with tagged releases (vX.Y.Z; without releases the default branch is used). The setup container reads module.json for the name, alias, description, logo, provider (folder name) and requirements, and the latest release for the version. Fields: repo (owner/name), path (folder inside the repository holding module.json, if not the root), note (shown on the card), requires (modules this one needs: alias, name, url, optional), composer_install (true: run `composer install` inside the module's folder before activating, for a module that ships its own composer.json and loads its own vendor/autoload.php). To add your own without rebuilding the package, put a file like this at modules.json in the freescout shared folder; its entries are added to these.",
+  "modules": [
+    {
+      "repo": "tombruton87/freescout-mail365",
+      "note": "Needs an Azure AD (Entra ID) app registration for the Microsoft Graph API."
+    },
+    {
+      "repo": "tombruton87/freescout-multi-assign",
+      "requires": [
+        {
+          "alias": "apiwebhooks",
+          "name": "API & Webhooks",
+          "url": "https://freescout.net/module/api-webhooks/",
+          "optional": true,
+          "for": "the assignee-changed webhook event"
+        },
+        {
+          "alias": "exportconversations",
+          "name": "Export Conversations",
+          "url": "https://freescout.net/module/export-conversations/",
+          "optional": true,
+          "for": "the Additional Assignees export column"
+        }
+      ]
+    },
+    {
+      "repo": "tombruton87/freescout-api-user-auth",
+      "requires": [
+        {
+          "alias": "apiwebhooks",
+          "name": "API & Webhooks",
+          "url": "https://freescout.net/module/api-webhooks/"
+        },
+        {
+          "alias": "snooze",
+          "name": "Snooze",
+          "url": "https://freescout.net/module/snooze/",
+          "optional": true,
+          "for": "the snooze endpoints"
+        },
+        {
+          "alias": "sendlater",
+          "name": "Send Later",
+          "url": "https://freescout.net/module/send-later/",
+          "optional": true,
+          "for": "the send-later endpoints"
+        }
+      ]
+    },
+    {
+      "repo": "tombruton87/CustomerNewTicket",
+      "requires": [
+        {
+          "alias": "crm",
+          "name": "Customers Management (CRM)",
+          "url": "https://freescout.net/module/crm/"
+        }
+      ]
+    },
+    {
+      "repo": "tombruton87/CustomFieldsReadOnly",
+      "requires": [
+        {
+          "alias": "customfields",
+          "name": "Custom Fields",
+          "url": "https://freescout.net/module/custom-fields/"
+        }
+      ]
+    },
+    {
+      "repo": "ShowDotFM/freescout-api-key-manager",
+      "path": "ApiKeyManager",
+      "requires": [
+        {
+          "alias": "apiwebhooks",
+          "name": "API & Webhooks",
+          "url": "https://freescout.net/module/api-webhooks/"
+        }
+      ]
+    },
+    {
+      "repo": "avenjamin/freescout-UnassignedCount-Module",
+      "note": "No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "weDevsOfficial/Laravel-FreeScout-Stripe-Module",
+      "note": "Its Stripe PHP library is installed into the module's own folder with Composer when the module is installed.",
+      "composer_install": true
+    },
+    {
+      "repo": "AdamCoffeeOverflow/freescout-ticket-aging-colors"
+    },
+    {
+      "repo": "karrierekick-dev/freescout-sortable-custom-fields",
+      "path": "src/SortableCustomFields",
+      "requires": [
+        {
+          "alias": "customfields",
+          "name": "Custom Fields",
+          "url": "https://freescout.net/module/custom-fields/"
+        }
+      ]
+    },
+    {
+      "repo": "rabsym/freescout-scheduled-conversations",
+      "note": "Relies on FreeScout's scheduler, which this package's container runs every minute."
+    },
+    {
+      "repo": "LJPc-solutions/freescout-internal-conversations-module",
+      "note": "Internal conversations between agents, not visible to customers."
+    },
+    {
+      "repo": "LJPc-solutions/freescout-cleanup-module",
+      "note": "Deletes old conversations and attachments on rules you set \u2014 read its README before switching anything on."
+    },
+    {
+      "repo": "yguerdat/freescout-secrets",
+      "path": "Secrets",
+      "note": "One-time secrets with customers. Best served on its own sub-domain (see its README); SMS passphrases need an SMSeagle gateway (optional)."
+    },
+    {
+      "repo": "skynettechnologies/freescout-allinoneaccessibility",
+      "note": "A hosted accessibility widget from Skynet Technologies: it needs an All in One Accessibility account and key, set in the module. No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "NeptunedGmbH/freescout-kanban-workflow",
+      "requires": [
+        {
+          "alias": "kanban",
+          "name": "Kanban",
+          "url": "https://freescout.net/module/kanban/"
+        },
+        {
+          "alias": "workflows",
+          "name": "Workflows",
+          "url": "https://freescout.net/module/workflows/"
+        }
+      ],
+      "note": "Adds an \"Add to Kanban Board\" action to Workflows."
+    },
+    {
+      "repo": "NeptunedGmbH/freescout-business-days",
+      "requires": [
+        {
+          "alias": "workflows",
+          "name": "Workflows",
+          "url": "https://freescout.net/module/workflows/"
+        }
+      ],
+      "note": "Business-day conditions for Workflows."
+    },
+    {
+      "repo": "NeptunedGmbH/freescout-kanban-auto-refresh",
+      "requires": [
+        {
+          "alias": "kanban",
+          "name": "Kanban",
+          "url": "https://freescout.net/module/kanban/"
+        }
+      ]
+    },
+    {
+      "repo": "EcomGraduates/KnowledgeBaseApiModule",
+      "requires": [
+        {
+          "alias": "knowledgebase",
+          "name": "Knowledge Base",
+          "url": "https://freescout.net/module/knowledge-base/"
+        }
+      ],
+      "note": "A public API for the knowledge base (used by WordPress/WooCommerce integrations)."
+    },
+    {
+      "repo": "yguerdat/freescout-kb-short-url",
+      "path": "KbShortUrl",
+      "requires": [
+        {
+          "alias": "knowledgebase",
+          "name": "Knowledge Base",
+          "url": "https://freescout.net/module/knowledge-base/"
+        }
+      ],
+      "note": "Short links for knowledge-base articles through your own Shlink server (needs one, with an API key). No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "ASTIN-UA/FreeScout-Organisations",
+      "path": "Modules/OrgPortal",
+      "requires": [
+        {
+          "alias": "customfields",
+          "name": "Custom Fields",
+          "url": "https://freescout.net/module/custom-fields/",
+          "optional": true,
+          "for": "organisation custom fields"
+        },
+        {
+          "alias": "enduserportal",
+          "name": "End-User Portal",
+          "url": "https://freescout.net/module/end-user-portal/",
+          "optional": true
+        },
+        {
+          "alias": "apiwebhooks",
+          "name": "API & Webhooks",
+          "url": "https://freescout.net/module/api-webhooks/",
+          "optional": true,
+          "for": "its REST API"
+        },
+        {
+          "alias": "kanban",
+          "name": "Kanban",
+          "url": "https://freescout.net/module/kanban/",
+          "optional": true
+        }
+      ],
+      "note": "Organisations (companies) with members and a portal. Its README is in Chinese."
+    },
+    {
+      "repo": "AdamCoffeeOverflow/freescout-mailbox-auto-distributor",
+      "requires": [
+        {
+          "alias": "teams",
+          "name": "Teams",
+          "url": "https://freescout.net/module/teams/",
+          "optional": true,
+          "for": "assigning to teams"
+        },
+        {
+          "alias": "workflows",
+          "name": "Workflows",
+          "url": "https://freescout.net/module/workflows/",
+          "optional": true,
+          "for": "workflows-first assignment"
+        }
+      ]
+    },
+    {
+      "repo": "AdamCoffeeOverflow/freescout-Overflow-Achievement",
+      "requires": [
+        {
+          "alias": "teams",
+          "name": "Teams",
+          "url": "https://freescout.net/module/teams/",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "repo": "AdamCoffeeOverflow/freescout-Adam-Smart-SearchUI",
+      "requires": [
+        {
+          "alias": "customfields",
+          "name": "Custom Fields",
+          "url": "https://freescout.net/module/custom-fields/",
+          "optional": true,
+          "for": "searching custom fields"
+        }
+      ]
+    },
+    {
+      "repo": "karrierekick-dev/freescout-smart-search",
+      "requires": [
+        {
+          "alias": "customfields",
+          "name": "Custom Fields",
+          "url": "https://freescout.net/module/custom-fields/",
+          "optional": true,
+          "for": "custom-field filters"
+        }
+      ]
+    },
+    {
+      "repo": "karrierekick-dev/freescout-auto-link-ticket",
+      "path": "src/AutoLinkTicket"
+    },
+    {
+      "repo": "maisen20/freescout-extended-mail-vars",
+      "path": "MaisenExtendetMailVar",
+      "note": "No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "altmenorg/freescout-refresh",
+      "requires": [
+        {
+          "alias": "tags",
+          "name": "Tags",
+          "url": "https://freescout.net/module/tags/",
+          "optional": true,
+          "for": "the tags sidebar"
+        }
+      ],
+      "note": "A Freshdesk-style look for FreeScout; works with Freshdesk Import."
+    },
+    {
+      "repo": "altmenorg/freescout-freshdesk-import",
+      "requires": [
+        {
+          "alias": "tags",
+          "name": "Tags",
+          "url": "https://freescout.net/module/tags/",
+          "optional": true,
+          "for": "importing tags"
+        }
+      ],
+      "note": "Needs a Freshdesk API key (an administrator's)."
+    },
+    {
+      "repo": "altmenorg/freescout-cobrowse",
+      "note": "Needs a Cobrowse.io account and licence key, and their SDK on your site."
+    },
+    {
+      "repo": "rabsym/freescout-attachment-security",
+      "note": "Scans and blocks attachments. Needs PHP's zip extension (present in this package's image); e-mail alerts need the SMTP mail driver."
+    },
+    {
+      "repo": "rabsym/freescout-syncnow"
+    },
+    {
+      "repo": "nielspeen/FastSearch",
+      "note": "No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "avenjamin/freescout-Following-Module",
+      "note": "No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "avenjamin/freescout-Themes-Module",
+      "note": "No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "webdados/BetterMailboxArchive"
+    },
+    {
+      "repo": "EcomGraduates/PageEmbedder",
+      "note": "No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "aarhus/AarhusChangeCustomer"
+    },
+    {
+      "repo": "aarhus/UnSub",
+      "composer_install": true,
+      "note": "Its HTTP library (Guzzle) is installed into the module's own folder with Composer when the module is installed."
+    },
+    {
+      "repo": "localmarketingpros/freescout-clickup",
+      "note": "Needs a ClickUp account and API token, and four custom fields on the ClickUp list."
+    },
+    {
+      "repo": "LJPc-solutions/freescout-whmcs-module",
+      "note": "Needs the WHMCS API enabled with credentials for this module."
+    },
+    {
+      "repo": "Joelhaggar/freescout_module_shopify",
+      "note": "Needs a Shopify custom app with read_customers and read_orders. No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "maevelander/freescout-qonversion-integration",
+      "note": "Needs a Qonversion account with API access. No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "presswizards/Freemius",
+      "note": "Needs a Freemius account. No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "verygoodplugins/freescout-github",
+      "note": "Needs a GitHub token (repo, read:org); AI features take an OpenAI or Claude key (optional)."
+    },
+    {
+      "repo": "darktohka/FreescoutDiscordModule",
+      "note": "Posts notifications to a Discord webhook. No releases on GitHub: the master branch is installed."
+    },
+    {
+      "repo": "totake0224/LINEIntegration",
+      "note": "Needs a LINE Messaging API channel. No releases on GitHub: the main branch is installed."
+    },
+    {
+      "repo": "losimo/freescout-meta-whatsapp",
+      "note": "WhatsApp through Meta's Cloud API: needs a WhatsApp Business account with a payment method. Its README is in Dutch."
+    },
+    {
+      "repo": "automaze-me/freescout-kapsowhatsapp",
+      "note": "WhatsApp through Kapso: needs a Kapso project API key, and FreeScout reachable from the internet for webhooks."
+    },
+    {
+      "repo": "automaze-me/freescout-n8nchat",
+      "note": "Embeds an n8n chat widget: needs your own n8n with a Chat Trigger workflow."
+    },
+    {
+      "repo": "fulldecent/freescout-dropkick-js",
+      "note": "Nicer drop-downs. Its author asks for a USD 10 licence code once it works for you."
+    },
+    {
+      "repo": "fulldecent/freescout-sidebar-webhook",
+      "note": "Shows content from your own backend in the sidebar. Its author asks for a USD 10 licence code once it works for you."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+[app]
+title="FreeScout"
+
+[notification]
+title="FreeScout"
+failing="{0} keeps stopping ({1} restarts in the last hour). See its log in Package Center → FreeScout → View log, or open FreeScout from the main menu."
+restarted="{0} had stopped and was started again."
+backupfailed="Last night's FreeScout backup didn't finish. Open FreeScout from the main menu → Backups to see why."
+bruteforce="{0} failed sign-ins to FreeScout in the last hour. Open FreeScout from the main menu → Activity to see the addresses."

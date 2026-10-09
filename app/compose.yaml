@@ -1,0 +1,82 @@
+# FreeScout, as the Synology package runs it: the compose project in the
+# freescout shared folder (/var/packages/freescout/shares/freescout). The
+# setup container (synology/setup/run.sh) writes .env beside this from the
+# install wizard's answers and the window's settings, then runs
+# `docker compose up -d` here. Nothing in it is Synology-specific: the same
+# file runs FreeScout on any Linux box with a .env like env.example.
+#
+# Images are pulled, never built here. FreeScout itself is the nfrastack
+# image (amd64 and arm64), which installs and upgrades FreeScout on start,
+# runs its scheduler and queue worker, and makes the first administrator on
+# a fresh database from ADMIN_*.
+services:
+  app:
+    image: ${FREESCOUT_IMAGE:-nfrastack/freescout:latest}
+    container_name: freescout-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT:-8060}:80"
+    # Docker volumes, not folders on the share: the container's own users
+    # (nginx for FreeScout, mysql for MariaDB) can't write into a DSM shared
+    # folder, whose ACLs only admit the package's user. The share keeps what
+    # the package writes itself — backups (which carry all of this), .env, logs.
+    volumes:
+      - app-data:/data      # config (with APP_KEY), sessions, cache, uploads, Modules/
+      - app-logs:/logs      # nginx, php, scheduler and queue-worker logs
+    environment:
+      CONTAINER_NAME: freescout-app
+      TIMEZONE: ${TZ:-UTC}
+      DEBUG_MODE: "FALSE"
+      DB_TYPE: mariadb
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: freescout
+      DB_USER: freescout
+      DB_PASS: ${DB_PASS}
+      # Only used on a fresh database. ADMIN_PASS comes from the setup
+      # container's environment on the first start and is never kept on disk.
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_FIRST_NAME: ${ADMIN_FIRST_NAME:-Admin}
+      ADMIN_LAST_NAME: ${ADMIN_LAST_NAME:-User}
+      ADMIN_PASS: ${ADMIN_PASS:-freescout}
+      APP_URL: ${APP_URL:-http://localhost:8060}
+      FREESCOUT_APP_TIMEZONE: ${TZ:-UTC}
+      # Behind DSM's reverse proxy (HTTPS): trust it, and keep cookies secure.
+      # "unset" tells the image to leave the setting out of FreeScout's .env.
+      FREESCOUT_APP_TRUSTED_PROXIES: ${TRUSTED_PROXIES:-unset}
+      FREESCOUT_SESSION_SECURE_COOKIE: ${SECURE_COOKIE:-unset}
+    healthcheck:
+      # Any answer from FreeScout counts, including 503 while it is in maintenance mode.
+      test: ["CMD-SHELL", "curl -s -o /dev/null -w '%{http_code}' --max-time 8 http://127.0.0.1/login | grep -qE '^(2|3|503)' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+
+  db:
+    image: ${MARIADB_IMAGE:-mariadb:11.4}
+    container_name: freescout-db
+    restart: unless-stopped
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MARIADB_DATABASE: freescout
+      MARIADB_USER: freescout
+      MARIADB_PASSWORD: ${DB_PASS}
+      TZ: ${TZ:-UTC}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb-buffer-pool-size=128M
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+volumes:
+  app-data:
+  app-logs:
+  db-data:
