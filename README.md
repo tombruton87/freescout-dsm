@@ -8,9 +8,12 @@ window to DSM for the things you otherwise need a shell for: locked-out
 administrators, backups, mail health, a module store, updates, storage, the
 activity log, and a clean removal.
 
-**Install:** download the latest `.spk` from
-[Releases](https://github.com/tombruton87/freescout-dsm/releases), then
-Package Center → Manual Install. DSM 7.2.1 or later; Container Manager is
+## Download
+
+**[⬇ freescout-1.0.0-1.spk](https://github.com/tombruton87/freescout-dsm/releases/download/v1.0.0/freescout-1.0.0-1.spk)** — version 1.0.0 (120 KB).
+All versions: [Releases](https://github.com/tombruton87/freescout-dsm/releases/latest).
+
+**Install:** Package Center → Manual Install → the `.spk`. DSM 7.2.1 or later; Container Manager is
 installed first if missing. The wizard asks for the NAS's address, a port, a
 time zone and the first administrator. The first start pulls the images (a few
 hundred MB) and sets the database up; then open **FreeScout** from DSM's main
