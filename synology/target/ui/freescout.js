@@ -26,6 +26,7 @@ Ext.define("FreeScout.AppWindow", {
                 autoEl: {
                     tag: "iframe",
                     src: "/webman/3rdparty/freescout/panel.html",
+                    allow: "clipboard-write",
                     frameborder: 0,
                     style: "width:100%;height:100%;border:0;display:block"
                 }

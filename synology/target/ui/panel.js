@@ -180,7 +180,27 @@
       $("secret-for").textContent = s.email || ""; $("secret").textContent = s.password || ""; $("secret-card").hidden = false; showTab("access");
     }).catch(function (e) { secretShown = false; showErr(e.message); });
   }
-  $("copy-secret").onclick = function () { try { navigator.clipboard.writeText($("secret").textContent); $("copy-secret").textContent = "Copied"; } catch (e) { /* select by hand */ } };
+  // Copy that works where DSM is: the clipboard API only exists on HTTPS pages, and DSM is often
+  // opened over http://nas:5000 — there the older copy command still works. If both fail, the text is
+  // selected so Ctrl+C (Cmd+C) copies it.
+  function selectNode(node) { try { var r = document.createRange(); r.selectNodeContents(node); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) { /* nothing to select */ } }
+  function copyLegacy(text) {
+    var ta = document.createElement("textarea"), ok = false;
+    ta.value = text; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;";
+    document.body.appendChild(ta); ta.focus(); ta.select(); try { ta.setSelectionRange(0, text.length); } catch (e) { /* older browsers */ }
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta); return ok;
+  }
+  function copyText(text, button, source) {
+    function done(ok) {
+      button.textContent = ok ? "Copied" : (/Mac/.test(navigator.platform) ? "Press ⌘C" : "Press Ctrl+C");
+      if (!ok && source) selectNode(source);
+      clearTimeout(button._t); button._t = setTimeout(function () { button.textContent = "Copy"; }, ok ? 2000 : 6000);
+    }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(copyLegacy(text)); });
+    else done(copyLegacy(text));
+  }
+  $("copy-secret").onclick = function () { copyText($("secret").textContent, $("copy-secret"), $("secret")); };
   $("newadmin").onclick = function () {
     secretShown = false; $("secret-card").hidden = true;
     act("newadmin", { email: $("new-email").value.trim(), first: $("new-first").value.trim(), last: $("new-last").value.trim() });

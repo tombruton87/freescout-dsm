@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+- The Copy button for one-time passwords works when DSM is opened over plain
+  HTTP (http://nas:5000), where browsers don't offer the clipboard API. If
+  copying is refused, the password is selected with a Ctrl+C hint.
+
 ## 1.0.1
 
 - A new icon: FreeScout's own mark on a tile shaped like DSM's own icons, in
